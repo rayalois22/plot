@@ -55,6 +55,7 @@ export class AxisX {
       labelAnchor,
       labelOffset
     } = this;
+    if (!x.interpolate && x.domain().length > 8 * ticks) return create("svg:g").node(); // avoid a huge ordinal domain
     const offset = this.name === "x" ? 0 : axis === "top" ? marginTop - facetMarginTop : marginBottom - facetMarginBottom;
     const offsetSign = axis === "top" ? -1 : 1;
     const ty = offsetSign * offset + (axis === "top" ? marginTop : height - marginBottom);
@@ -140,6 +141,7 @@ export class AxisY {
       labelAnchor,
       labelOffset
     } = this;
+    if (!y.interpolate && y.domain().length > 8 * ticks) return create("svg:g").node(); // avoid a huge ordinal domain
     const offset = this.name === "y" ? 0 : axis === "left" ? marginLeft - facetMarginLeft : marginRight - facetMarginRight;
     const offsetSign = axis === "left" ? -1 : 1;
     const tx = offsetSign * offset + (axis === "right" ? width - marginRight : marginLeft);
