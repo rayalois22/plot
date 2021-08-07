@@ -47,3 +47,10 @@ it("movingAverage respects shift", () => {
   assert.deepStrictEqual(mt.x.transform(), [,, 1, 2, 3, 4]);
 });
 
+it("movingAverage throws on non-numeric data", () => {
+  const data = ["A", 1, 2, 3, 4, 5];
+  const mc = Plot.windowX({k: 3, x: d => d});
+  assert.throws(() => {
+    mc.transform(data, [d3.range(data.length)]);
+  });
+});

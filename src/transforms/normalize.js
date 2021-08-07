@@ -1,6 +1,6 @@
 import {extent, mean, median, sum} from "d3";
 import {defined} from "../defined.js";
-import {take} from "../mark.js";
+import {checkNumeric, take} from "../mark.js";
 import {mapX, mapY} from "./map.js";
 
 export function normalizeX({basis, ...options} = {}) {
@@ -28,6 +28,7 @@ function normalize(basis) {
 function normalizeBasis(basis) {
   return {
     map(I, S, T) {
+      checkNumeric(S);
       const b = +basis(I, S);
       for (const i of I) {
         T[i] = S[i] === null ? NaN : S[i] / b;
@@ -38,6 +39,7 @@ function normalizeBasis(basis) {
 
 const normalizeExtent = {
   map(I, S, T) {
+    checkNumeric(S);
     const [s1, s2] = extent(I, i => S[i]), d = s2 - s1;
     for (const i of I) {
       T[i] = S[i] === null ? NaN : (S[i] - s1) / d;

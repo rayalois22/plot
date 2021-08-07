@@ -340,3 +340,14 @@ export function isTemporal(values) {
     return value instanceof Date;
   }
 }
+
+function isNumeric(values) {
+  for (const value of values) {
+    if (value == null) continue;
+    return !isNaN(+value);
+  }
+}
+
+export function checkNumeric(S) {
+  if (!isNumeric(S)) throw new Error("the reducer expects numeric input");
+}

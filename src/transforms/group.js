@@ -1,6 +1,6 @@
 import {group as grouper, sort, sum, deviation, min, max, mean, median, mode, variance, InternSet} from "d3";
 import {firstof} from "../defined.js";
-import {valueof, maybeColor, maybeInput, maybeTransform, maybeTuple, maybeLazyChannel, lazyChannel, first, identity, take, labelof, range} from "../mark.js";
+import {valueof, maybeColor, maybeInput, maybeTransform, maybeTuple, maybeLazyChannel, lazyChannel, first, identity, take, labelof, range, checkNumeric} from "../mark.js";
 
 // Group on {z, fill, stroke}.
 export function groupZ(outputs, options) {
@@ -143,12 +143,12 @@ export function maybeReduce(reduce, value) {
     case "sum": return value == null ? reduceCount : reduceSum;
     case "proportion": return reduceProportion(value, "data");
     case "proportion-facet": return reduceProportion(value, "facet");
-    case "deviation": return reduceAccessor(deviation);
+    case "deviation": return reduceAccessor(deviation, true);
     case "min": return reduceAccessor(min);
     case "max": return reduceAccessor(max);
-    case "mean": return reduceAccessor(mean);
-    case "median": return reduceAccessor(median);
-    case "variance": return reduceAccessor(variance);
+    case "mean": return reduceAccessor(mean, true);
+    case "median": return reduceAccessor(median, true);
+    case "variance": return reduceAccessor(variance, true);
     case "mode": return reduceAccessor(mode);
   }
   throw new Error("invalid reduce");
@@ -170,9 +170,10 @@ function reduceFunction(f) {
   };
 }
 
-function reduceAccessor(f) {
+function reduceAccessor(f, check) {
   return {
     reduce(I, X) {
+      if (check) checkNumeric(X);
       return f(I, i => X[i]);
     }
   };
@@ -212,7 +213,7 @@ const reduceDistinct = {
   }
 };
 
-const reduceSum = reduceAccessor(sum);
+const reduceSum = reduceAccessor(sum, true);
 
 function reduceProportion(value, scope) {
   return value == null

@@ -1,5 +1,6 @@
 import {mapX, mapY} from "./map.js";
 import {deviation, max, min, median, variance} from "d3";
+import {checkNumeric} from "../mark.js";
 
 export function windowX({k, reduce, shift, ...options} = {}) {
   return mapX(window(k, reduce, shift), options);
@@ -45,6 +46,7 @@ function maybeReduce(reduce = "mean") {
 function reduceSubarray(f) {
   return (k, s) => ({
     map(I, S, T) {
+      checkNumeric(S);
       const C = Float64Array.from(I, i => S[i] === null ? NaN : S[i]);
       let nans = 0;
       for (let i = 0; i < k - 1; ++i) if (isNaN(C[i])) ++nans;
@@ -60,6 +62,7 @@ function reduceSubarray(f) {
 function reduceSum(k, s) {
   return {
     map(I, S, T) {
+      checkNumeric(S);
       let nans = 0;
       let sum = 0;
       for (let i = 0; i < k - 1; ++i) {
@@ -95,6 +98,7 @@ function reduceMean(k, s) {
 function reduceDifference(k, s) {
   return {
     map(I, S, T) {
+      checkNumeric(S);
       for (let i = 0, n = I.length - k; i < n; ++i) {
         const a = S[I[i]];
         const b = S[I[i + k - 1]];
@@ -107,6 +111,7 @@ function reduceDifference(k, s) {
 function reduceRatio(k, s) {
   return {
     map(I, S, T) {
+      checkNumeric(S);
       for (let i = 0, n = I.length - k; i < n; ++i) {
         const a = S[I[i]];
         const b = S[I[i + k - 1]];
