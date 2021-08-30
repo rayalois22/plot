@@ -275,6 +275,7 @@ export function labelof(value, defaultValue) {
 }
 
 // Like lazyChannel, but allows the source to be null.
+// TODO: rename as column
 export function maybeLazyChannel(source) {
   return source == null ? [source] : lazyChannel(source);
 }

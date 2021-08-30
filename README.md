@@ -978,6 +978,7 @@ Plot’s transforms provide a convenient mechanism for transforming data as part
 * **filter** - filters data according to the specified accessor or values
 * **sort** - sorts data according to the specified comparator, accessor, or values
 * **reverse** - reverses the sorted (or if not sorted, the input) data order
+* **transform** - a function that returns transformed *data* and *facets*
 
 For example, to draw bars only for letters that commonly form vowels:
 
@@ -992,10 +993,6 @@ Plot.barY(alphabet.filter(d => /[aeiou]/i.test(d.letter)), {x: "letter", y: "fre
 ```
 
 Together the **sort** and **reverse** transforms allow control over *z*-order, which can be important when addressing overplotting. If the sort option is a function but does not take exactly one argument, it is assumed to be a [comparator function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#description); otherwise, the sort option is interpreted as a channel value definition and thus may be either as a column name, accessor function, or array of values.
-
-For greater control, you can also implement a custom transform function:
-
-* **transform** - a function that returns transformed *data* and *index*
 
 The basic transforms are composable: the *filter* transform is applied first, then *sort*, then *reverse*. If a custom *transform* option is specified directly, it supersedes any basic transforms (*i.e.*, the *filter*, *sort* and *reverse* options are ignored). However, the *transform* option is rarely used directly; instead an option transform is used. These option transforms automatically compose with the basic *filter*, *sort* and *reverse* transforms.
 
@@ -1521,6 +1518,28 @@ The following named curve methods are supported:
 If *curve* is a function, it will be invoked with a given *context* in the same fashion as a [D3 curve factory](https://github.com/d3/d3-shape/blob/master/README.md#custom-curves).
 
 The tension option only has an effect on cardinal and Catmull–Rom splines (*cardinal*, *cardinal-open*, *cardinal-closed*, *catmull-rom*, *catmull-rom-open*, and *catmull-rom-closed*). For cardinal splines, it corresponds to [tension](https://github.com/d3/d3-shape/blob/master/README.md#curveCardinal_tension); for Catmull–Rom splines, [alpha](https://github.com/d3/d3-shape/blob/master/README.md#curveCatmullRom_alpha).
+
+### Custom transforms
+
+For greater control, you can also implement a custom transform function, by defining the following option:
+
+* **transform** - a function that returns transformed *data* and *facets*
+
+The arguments of the *transform* function are *data* and *facets*. The incoming *facets* is an array of facets, each facet being an array of indices into the incoming *data* array. The transform must return an object with two properties *{data, facets}* with the same structure. (The new data and facets can, of course, be different from the incoming values.)
+
+A custom transform might also generate new channels (for example, the count of elements in a groupX transform might be returned as a new channel *y*). The following helpers are useful to build new custom transforms:
+
+#### Plot.transform(...*transforms*)
+
+Composes several transforms, returning an options object with a *transform* that corresponds to the chained application of the arguments. The *transforms* can be specified as functions, or as objects with a *transform* function. The first transform can also use the *filter*, *sort* and *map* options.
+
+#### Plot.column(*x*)
+
+Returns [*X*, *setX*], a channel and a setter. *X* can be returned immediately as a new channel, and *setX* can be called to fill *X* when the transform is applied to the data. The resulting channel *X* is an object with a *transform* method that returns the materialized column of values instantiated by *setX*.
+
+If *x* is a string or has a label, a label is automatically created on the resulting channel.
+
+If *x* is null or undefined, it is propagated as is, and *setX* is undefined; this helps build transforms with optional arguments.
 
 ## Formats
 
