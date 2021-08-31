@@ -447,7 +447,7 @@ Plot.plot({
 
 When the *include* or *exclude* facet mode is chosen, the mark data must be parallel to the facet data: the mark data must have the same length and order as the facet data. If the data are not parallel, then the wrong data may be shown in each facet. The default *auto* therefore requires strict equality (`===`) for safety, and using the facet data as mark data is recommended when using the *exclude* facet mode. (To construct parallel data safely, consider using [*array*.map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) on the facet data.)
 
-The *columns* option wraps facets with the given number of columns, which defaults to the square root of the number of facets when *columns* is true. If *columns* is not set, the *rows* option similarly wraps facets with the given number of rows. The facets’ layout starts from the top-left and expands horizontally if the facet is given by the *x* channel, and vertically if the facet is given by *y*.
+The *columns* option wraps facets with the given number of columns, which defaults to the square root of the number of facets when *columns* is true. If *columns* is not set, the *rows* option similarly wraps facets with the given number of rows. The facets’ layout starts from the top-left and expands horizontally if the facet is given by the *x* channel, and vertically if the facet is given by *y*. Facets are sorted in natural order, but a different order can be given by setting an explicit facet.domain or by using a mark’s sort option.
 
 ## Marks
 

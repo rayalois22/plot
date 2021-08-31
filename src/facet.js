@@ -1,4 +1,4 @@
-import {cross, difference, groups, sort, InternMap, InternSet} from "d3";
+import {cross, difference, groups, range, sort, InternMap, InternSet} from "d3";
 import {create} from "d3";
 import {Mark, first, second, markify, where} from "./mark.js";
 import {applyScales} from "./scales.js";
@@ -11,7 +11,7 @@ export function facets(data, {x, y, ...options}, marks) {
 }
 
 class Facet extends Mark {
-  constructor(data, {x, y, columns, rows, ...options} = {}, marks = []) {
+  constructor(data, {x, y, columns, rows, domain, ...options} = {}, marks = []) {
     if (data == null) throw new Error("missing facet data");
     super(
       data,
@@ -24,6 +24,7 @@ class Facet extends Mark {
     this.marks = marks.flat(Infinity).map(markify);
     this.columns = columns;
     this.rows = rows;
+    this.domain = domain;
     // The following fields are set by initialize:
     this.marksChannels = undefined; // array of mark channels
     this.marksIndexByFacet = undefined; // map from facet key to array of mark indexes
@@ -70,22 +71,23 @@ class Facet extends Mark {
     }
 
     // facet wrap
-    const {columns, rows} = this;
+    const {columns, rows, domain} = this;
     if (columns || rows) {
       const channel = channels.find(d => d[0] === "fx") || channels.find(d => d[0] === "fy");
       const opposite = channel[0] === "fy";
       if (channel) {
         // the domain can be set with the sort option
-        const domain = (typeof channel[1].domain === "function") ? channel[1].domain() : sort(new InternSet(channel[1].value));
-        delete channel[1].domain;
-        const m = new Map(Array.from(domain, (v, i) => [v, i]));
+        const d = domain != null ? domain : typeof channel[1].domain === "function" ? channel[1].domain() : sort(new InternSet(channel[1].value));
+        const m = new Map(Array.from(d, (v, i) => [v, i]));
         const cols = columns
           ? columns === true ? m.size < 4 ? m.size : Math.min(6, Math.floor(Math.sqrt(m.size))) : columns
           : Math.ceil(m.size / (rows === true ? m.size < 4 ? m.size : Math.min(6, Math.floor(Math.sqrt(m.size))) : rows));
         const step = opposite ? Math.ceil(m.size / cols) : cols;
         const fy = opposite ? "fx" : "fy";
-        channels.push([fy, {scale: fy, value: channel[1].value.map(v => Math.floor(m.get(v) / step)) }]);
+        const valueY = channel[1].value.map(v => Math.floor(m.get(v) / step));
         channel[1].value = channel[1].value.map(v => Math.floor(m.get(v) % step));
+        channel[1].domain = () => range(step);
+        channels.push([fy, {scale: fy, value: valueY, domain: () => range(Math.ceil(m.size / step)) }]);
         const B = new facetMap({length: 2});
         for (const [v, i] of m) {
           const key = [i % step, Math.floor(i / step)];
