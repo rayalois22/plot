@@ -4,14 +4,15 @@ import {Mark, first, second, markify, where} from "./mark.js";
 import {applyScales} from "./scales.js";
 import {filterStyles} from "./style.js";
 
-export function facets(data, {x, y, ...options}, marks) {
+export function facets({marks, facet, fx, fy, ...options}) {
+  const {data, x, y, ...rest} = facet;
   return x === undefined && y === undefined
-    ? marks // if no facets are specified, ignore!
-    : [new Facet(data, {x, y, ...options}, marks)];
+    ? {marks, ...options}  // if no facets are specified, ignore!
+    : {marks: [new Facet(data, {x, y, ...rest}, marks, fx, fy)], facet, fx, fy, ...options};
 }
 
 class Facet extends Mark {
-  constructor(data, {x, y, columns, rows, domain, ...options} = {}, marks = []) {
+  constructor(data, {x, y, columns, rows, ...options} = {}, marks = [], fx, fy) {
     if (data == null) throw new Error("missing facet data");
     super(
       data,
@@ -22,9 +23,17 @@ class Facet extends Mark {
       options
     );
     this.marks = marks.flat(Infinity).map(markify);
-    this.columns = columns;
-    this.rows = rows;
-    this.domain = domain;
+    if (rows || columns) {
+      this.columns = columns;
+      this.rows = rows;
+      if (x && fx != null) {
+        this.domain = fx.domain;
+        delete fx.domain;
+      } else if (y && fy != null) {
+        this.domain = fy.domain;
+        delete fy.domain;
+      }
+    }
     // The following fields are set by initialize:
     this.marksChannels = undefined; // array of mark channels
     this.marksIndexByFacet = undefined; // map from facet key to array of mark indexes
@@ -92,7 +101,8 @@ class Facet extends Mark {
         for (const [v, i] of m) {
           const key = [i % step, Math.floor(i / step)];
           if (opposite) key.reverse();
-          B.set(key, marksIndexByFacet.get(v));
+          const f = marksIndexByFacet.get(v);
+          if (f !== undefined) B.set(key, f);
         }
         this.marksIndexByFacet = B;
       }

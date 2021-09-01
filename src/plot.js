@@ -9,11 +9,7 @@ export function plot(options = {}) {
   const {facet, style, caption} = options;
 
   // When faceting, wrap all marks in a faceting mark.
-  if (facet !== undefined) {
-    const {marks} = options;
-    const {data} = facet;
-    options = {...options, marks: facets(data, facet, marks)};
-  }
+  if (facet !== undefined) options = facets(options);
 
   // Flatten any nested marks.
   const marks = options.marks === undefined ? [] : options.marks.flat(Infinity).map(markify);
