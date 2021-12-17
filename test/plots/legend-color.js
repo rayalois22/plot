@@ -21,7 +21,7 @@ export function colorLegendCategoricalColumns() {
         "Other"
       ]
     },
-    label: "Hello",
+    label: "Industry",
     columns: "180px"
   });
 }

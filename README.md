@@ -509,7 +509,8 @@ mylegend = myplot.legend("color")
 
 Categorical and ordinal color legends are rendered as swatches, unless *options*.**legend** is set to *ramp*. The swatches can be configured with the following options:
 
-* *options*.**tickFormat** - a format function for the labels
+* *options*.**tickFormat** - a format function for the domain values
+* *options*.**label** - explicit label for the legend—by default, no label is shown
 * *options*.**swatchSize** - the size of the swatch (if square)
 * *options*.**swatchWidth** - the swatches’ width
 * *options*.**swatchHeight** - the swatches’ height

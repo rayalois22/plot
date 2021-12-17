@@ -27,7 +27,7 @@ export function exposeLegends(scales, defaults = {}) {
 }
 
 function legendOptions({label, ticks, tickFormat} = {}, options = {}) {
-  return {label, ticks, tickFormat, ...options};
+  return {label, ticks, tickFormat, ...options, explicitLabel: options.label != null};
 }
 
 export function Legends(scales, options) {

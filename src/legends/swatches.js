@@ -7,7 +7,8 @@ export function legendSwatches(color, {
   columns,
   tickFormat,
   fontVariant = inferFontVariant(color),
-  // TODO label,
+  explicitLabel,
+  label,
   swatchSize = 15,
   swatchWidth = swatchSize,
   swatchHeight = swatchSize,
@@ -25,6 +26,13 @@ export function legendSwatches(color, {
         --swatchWidth: ${+swatchWidth}px;
         --swatchHeight: ${+swatchHeight}px;
       `);
+
+  const palette = explicitLabel
+      ? swatches.call(div => div.append("p")
+          .text(label)
+          .style("font-weight", "bold"))
+        .append("div")
+      : swatches;
 
   let extraStyle;
 
@@ -46,7 +54,7 @@ export function legendSwatches(color, {
       }
     `;
 
-    swatches
+    palette
         .style("columns", columns)
       .selectAll()
       .data(color.domain)
@@ -72,8 +80,7 @@ export function legendSwatches(color, {
       }
     `;
 
-    swatches
-      .selectAll()
+    palette.selectAll()
       .data(color.domain)
       .join("span")
         .attr("class", `${className}-swatch`)
