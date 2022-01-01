@@ -1,4 +1,4 @@
-import {labelof, maybeValue, valueof} from "../mark.js";
+import {isTemporal, labelof, maybeValue, valueof} from "../mark.js";
 import {maybeInsetX, maybeInsetY} from "./inset.js";
 
 // TODO Allow the interval to be specified as a string, e.g. “day” or “hour”?
@@ -9,19 +9,9 @@ function maybeInterval(interval) {
   if (typeof interval === "number") {
     const n = interval;
     // Note: this offset doesn’t support the optional step argument for simplicity.
-    interval = {
-      floor: d => n * Math.floor(d / n),
-      mid: d => n * (Math.floor(d / n) + 0.5),
-      offset: d => d + n
-    };
+    interval = {floor: d => n * Math.floor(d / n), offset: d => d + n};
   }
   if (typeof interval.floor !== "function" || typeof interval.offset !== "function") throw new Error("invalid interval");
-  if (typeof interval.mid !== "function") {
-    interval = {
-      ...interval,
-      mid: x => (x = interval.floor(x), new Date((+x + +interval.offset(x)) / 2))
-    };
-  }
   return interval;
 }
 
@@ -41,7 +31,7 @@ function maybeIntervalK(k, maybeInsetK, options) {
   const label = labelof(v);
   function transform(data) {
     if (V1 !== undefined && data === D1) return V1; // memoize
-    return V1 = valueof(D1 = data, value).map(v => interval.floor(v));
+    return V1 = Array.from(valueof(D1 = data, value), v => interval.floor(v));
   }
   return maybeInsetK({
     ...options,
@@ -59,7 +49,13 @@ function maybeIntervalMidK(k, maybeInsetK, options) {
     ...options,
     [k]: {
       label: labelof(v),
-      transform: data => valueof(data, value).map(interval.mid)
+      transform: data => {
+        const V1 = Array.from(valueof(data, value), v => interval.floor(v));
+        const V2 = V1.map(v => interval.offset(v));
+        return V1.map(isTemporal(V1)
+          ? (v1, v2) => v1 == null || isNaN(v1 = +v1) || (v2 = V2[v2], v2 == null) || isNaN(v2 = +v2) ? undefined : new Date((v1 + v2) / 2)
+          : (v1, v2) => v1 == null || (v2 = V2[v2], v2 == null) ? NaN : (+v1 + +v2) / 2);
+      }
     }
   });
 }
